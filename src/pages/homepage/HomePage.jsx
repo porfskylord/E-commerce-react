@@ -1,24 +1,19 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Header } from "../../components/Header";
+import { formatMoney } from "../../utils/money";
 import CheckmarkIcon from "../../assets/images/icons/checkmark.png";
 import "./HomePage.css";
 
-export function HomePage() {
+export function HomePage( {cart} ) {
 
   const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState([])
 
   useEffect(() =>{
     axios.get('/api/products')
-    .then((response) => {
-      setProducts(response.data);
-    });
-
-    axios.get('/api/cart-items')
-    .then((response) => {
-      setCart(response.data)
-    })
+      .then((response) => {
+        setProducts(response.data);
+      });
   },[]);
 
   
@@ -55,7 +50,7 @@ export function HomePage() {
                   <div className="product-rating-count link-primary">{products.rating.count}</div>
                 </div>
 
-                <div className="product-price">${(products.priceCents/100).toFixed(2)}</div>
+                <div className="product-price">{formatMoney(products.priceCents)}</div>
 
                 <div className="product-quantity-container">
                   <select>
