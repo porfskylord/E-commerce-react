@@ -1,6 +1,6 @@
-import { Header } from "../components/Header";
+import { Header } from "../../components/Header";
 import { NavLink } from "react-router";
-import BuyAgainIcon from '../assets/images/icons/buy-again.png';
+import BuyAgainIcon from '../../assets/images/icons/buy-again.png';
 import "./OrderPage.css";
 
 export function OrderPage() {

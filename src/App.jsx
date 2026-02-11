@@ -1,9 +1,9 @@
 import { Routes, Route } from "react-router";
-import { HomePage } from "./pages/HomePage";
+import { HomePage } from "./pages/homepage/HomePage";
 import { CheckoutPage } from "./pages/checkout/CheckoutPage";
-import { OrderPage } from "./pages/OrderPage";
-import { TrackingPage } from "./pages/TrackingPage";
-import { NotFoundPage } from "./pages/NotFoundPage";
+import { OrderPage } from "./pages/order/OrderPage";
+import { TrackingPage } from "./pages/tracking/TrackingPage";
+import { NotFoundPage } from "./pages/notfound/NotFoundPage";
 
 import "./App.css";
 
