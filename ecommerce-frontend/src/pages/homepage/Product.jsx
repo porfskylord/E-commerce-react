@@ -4,7 +4,9 @@ import { useState } from "react";
 import CheckmarkIcon from "../../assets/images/icons/checkmark.png";
 
 export function Product({ product, loadCart }) {
+
   const [quantity, setQuantity] = useState(1);
+  const [showAddedMessage, setShowAddedMessage] = useState(false);
 
   const addToCart = async () => {
     await axios.post("api/cart-items", {
@@ -13,6 +15,12 @@ export function Product({ product, loadCart }) {
     });
     await loadCart();
     setQuantity(1);
+
+    setShowAddedMessage(true);
+    setTimeout(() => {
+      setShowAddedMessage(false);
+    }, 2000);
+    
   };
 
   const selectQuatity = (event) => {
@@ -57,7 +65,7 @@ export function Product({ product, loadCart }) {
 
       <div className="product-spacer"></div>
 
-      <div className="added-to-cart">
+      <div className="added-to-cart" style={{opacity: showAddedMessage ? 1 : 0,}}>
         <img src={CheckmarkIcon} />
         Added
       </div>
