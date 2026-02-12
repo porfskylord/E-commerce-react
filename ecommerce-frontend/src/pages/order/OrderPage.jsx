@@ -6,7 +6,6 @@ import { NavLink } from "react-router";
 import { formatMoney } from "../../utils/money";
 import BuyAgainIcon from "../../assets/images/icons/buy-again.png";
 import "./OrderPage.css";
-import { products } from "../../../starting-code/data/products";
 
 export function OrderPage({ cart }) {
   const [orders, setOrders] = useState([]);
