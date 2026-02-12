@@ -5,15 +5,19 @@ import com.ec.ecommerce_backend.model.CartItem;
 import com.ec.ecommerce_backend.model.DeliveryOption;
 import com.ec.ecommerce_backend.model.Order;
 import com.ec.ecommerce_backend.model.Product;
+import com.ec.ecommerce_backend.model.Rating;
 import com.ec.ecommerce_backend.repository.CartItemRepository;
 import com.ec.ecommerce_backend.repository.DeliveryOptionRepository;
 import com.ec.ecommerce_backend.repository.OrderRepository;
 import com.ec.ecommerce_backend.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,9 +44,10 @@ public class OrderController {
                         List<OrderProduct> products = order.getProducts().stream()
                                 .map(product -> {
                                     OrderProduct orderProduct = new OrderProduct();
-                                    orderProduct.setProductId(product.getId());
-                                    orderProduct.setQuantity(1);
-                                    orderProduct.setProduct(product);
+                                    orderProduct.setProductId(product.getProductId());
+                                    orderProduct.setQuantity(product.getQuantity());
+                                    orderProduct.setEstimatedDeliveryTimeMs(product.getEstimatedDeliveryTimeMs());
+                                    orderProduct.setProduct(product.getProduct());
                                     return orderProduct;
                                 })
                                 .collect(Collectors.toList());
@@ -60,14 +65,26 @@ public class OrderController {
         }
 
         return orders.stream()
-                .map(order -> Map.of(
-                        "id", order.getId(),
-                        "orderTimeMs", order.getOrderTimeMs(),
-                        "totalCostCents", order.getTotalCostCents(),
-                        "products", order.getProducts(),
-                        "createdAt", order.getCreatedAt(),
-                        "updatedAt", order.getUpdatedAt()
-                ))
+                .map(order -> {
+                    List<OrderProduct> products = order.getProducts().stream()
+                            .map(product -> {
+                                OrderProduct orderProduct = new OrderProduct();
+                                orderProduct.setProductId(product.getProductId());
+                                orderProduct.setEstimatedDeliveryTimeMs(product.getEstimatedDeliveryTimeMs());
+                                orderProduct.setQuantity(product.getQuantity());
+                                return orderProduct;
+                            })
+                            .collect(Collectors.toList());
+
+                    return Map.of(
+                            "id", order.getId(),
+                            "orderTimeMs", order.getOrderTimeMs(),
+                            "totalCostCents", order.getTotalCostCents(),
+                            "products", products,
+                            "createdAt", order.getCreatedAt(),
+                            "updatedAt", order.getUpdatedAt()
+                    );
+                })
                 .collect(Collectors.toList());
     }
 
@@ -96,10 +113,15 @@ public class OrderController {
                     orderProduct.setEstimatedDeliveryTimeMs(
                             System.currentTimeMillis() + deliveryOption.getDeliveryDays() * 24L * 60 * 60 * 1000
                     );
+                    orderProduct.setProduct(productRepository.findById(cartItem.getProductId())
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                    "Product not found: " + cartItem.getProductId())));
 
                     return orderProduct;
                 })
                 .collect(Collectors.toList());
+
+
 
         int totalCostCents = products.stream()
                 .mapToInt(orderProduct -> {
@@ -119,9 +141,8 @@ public class OrderController {
         Order order = new Order();
         order.setOrderTimeMs(System.currentTimeMillis());
         order.setTotalCostCents(totalCostCents);
-        order.setProducts(products.stream()
-                .map(orderProduct -> productRepository.findById(orderProduct.getProductId()).orElseThrow())
-                .collect(Collectors.toList()));
+        order.setProducts(products);
+
 
         Order savedOrder = orderRepository.save(order);
 
@@ -139,9 +160,10 @@ public class OrderController {
             List<OrderProduct> products = order.getProducts().stream()
                     .map(product -> {
                         OrderProduct orderProduct = new OrderProduct();
-                        orderProduct.setProductId(product.getId());
-                        orderProduct.setQuantity(1);
-                        orderProduct.setProduct(product);
+                        orderProduct.setProductId(product.getProductId());
+                        orderProduct.setQuantity(product.getQuantity());
+                        orderProduct.setEstimatedDeliveryTimeMs(product.getEstimatedDeliveryTimeMs());
+                        orderProduct.setProduct(product.getProduct());
                         return orderProduct;
                     })
                     .collect(Collectors.toList());
@@ -156,6 +178,30 @@ public class OrderController {
             );
         }
 
-        return order;
+        List<OrderProduct> products = order.getProducts().stream()
+                .map(product -> {
+                    OrderProduct orderProduct = new OrderProduct();
+                    orderProduct.setProductId(product.getProductId());
+                    orderProduct.setEstimatedDeliveryTimeMs(product.getEstimatedDeliveryTimeMs());
+                    orderProduct.setQuantity(product.getQuantity());
+                    return orderProduct;
+                })
+                .collect(Collectors.toList());
+
+        return Map.of(
+                "id", order.getId(),
+                "orderTimeMs", order.getOrderTimeMs(),
+                "totalCostCents", order.getTotalCostCents(),
+                "products", products,
+                "createdAt", order.getCreatedAt(),
+                "updatedAt", order.getUpdatedAt()
+        );
+    }
+
+    @PostMapping("/reset")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void seedDatabase() {
+        orderRepository.deleteAll();
+        cartItemRepository.deleteAll();
     }
 }

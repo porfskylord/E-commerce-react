@@ -1,5 +1,6 @@
 package com.ec.ecommerce_backend.model;
 
+import com.ec.ecommerce_backend.dto.OrderProduct;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -21,7 +22,7 @@ public class Order {
     private Long orderTimeMs;
     private Integer totalCostCents;
 
-    private List<Product> products;
+    private List<OrderProduct> products;
 
 
     @CreatedDate
